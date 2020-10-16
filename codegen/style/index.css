@@ -37,3 +37,7 @@
   margin: 8px;
   border: 1px solid orangered;
 }
+
+.demo-envVar {
+  color: orangered;
+}

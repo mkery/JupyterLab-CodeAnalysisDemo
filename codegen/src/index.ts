@@ -36,8 +36,11 @@ const extension: JupyterFrontEndPlugin<void> = {
       const notebook = new NotebookAPI(widget);
       notebook.ready.then(() => {
         console.log('ITS ALIVE', notebook);
-        renderUI(myUI, notebook);
-        notebook.changed.connect(() => renderUI(myUI, notebook));
+        renderUI(myUI, { notebook, variables: null });
+        notebook.changed.connect(async () => {
+          let variables = await notebook.kernel.getEnv();
+          renderUI(myUI, { notebook, variables });
+        });
       });
     });
   },
@@ -60,9 +63,9 @@ function buildUI(app: JupyterFrontEnd, layout: ILayoutRestorer) {
   return myView;
 }
 
-function renderUI(widget: Widget, notebook?: NotebookAPI) {
+function renderUI(widget: Widget, props = {}) {
   // now render the panel view
-  let ui = React.createElement(MyAppUI, { notebook });
+  let ui = React.createElement(MyAppUI, props);
   ReactDOM.render(ui, widget.node);
 }
 

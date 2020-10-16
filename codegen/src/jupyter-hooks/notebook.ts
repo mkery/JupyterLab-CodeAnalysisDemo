@@ -1,24 +1,24 @@
-import { NotebookPanel, Notebook } from '@jupyterlab/notebook';
-import { Kernel, Session } from '@jupyterlab/services';
+import { NotebookPanel, Notebook,NotebookActions } from '@jupyterlab/notebook';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { Signal, ISignal } from '@lumino/signaling';
 
 
 import CellAPI from './cell';
+import KernelAPI from './kernel'
 
 export class NotebookAPI {
   private readonly _ready: PromiseDelegate<void>;
   private _changed = new Signal<this, string>(this);
 
   panel: NotebookPanel;
-  kernel: Kernel.IKernelConnection;
+  kernel: KernelAPI;
   cells: CellAPI[];
 
   constructor(notebookPanel: NotebookPanel) {
     this.panel = notebookPanel;
+    this.kernel = new KernelAPI(this.panel.sessionContext)
     this.listenToSession();
-    this.listenToKernel();
 
     this._ready = new PromiseDelegate<void>();
     this.panel.revealed.then(() => {
@@ -69,12 +69,11 @@ export class NotebookAPI {
   }
 
   get activeCell() {
-    return this.cells.find(
-      cell => cell.model.id === this.notebook.activeCell.model.id
-    );
+    const active = this.notebook.activeCell
+    return this.cells.find(c => c.model.id === active.model.id)
   }
 
-  addCell(kind: 'code'| 'markdown', text: string, index: number){
+  public addCell(kind: 'code'| 'markdown', text: string, index: number){
     let cell;
     if(kind ==='code')
       cell = this.notebook.model.contentFactory.createCodeCell({})
@@ -98,10 +97,23 @@ export class NotebookAPI {
     });
 
     // event fires when the user selects a cell
-    this.notebook.activeCellChanged.connect(() => {
+    this.notebook.activeCellChanged.connect((_, cell) => {
       this._changed.emit('activeCell');
     });
+
+    // event fires when any cell is run
+    NotebookActions.executed.connect((_, args) => {
+      // can get execution signals from other notebooks
+      if (args.notebook.id === this.notebook.id) {
+        const cell = this.cells.find(c => c.model.id === args.cell.model.id)
+        if(cell) {
+          cell._runSignal.emit()
+          this._changed.emit('cell run')
+        }
+      }
+    });
   }
+  
 
   private listenToSession() {
     // event fires when the user moves or renames their notebook
@@ -111,18 +123,12 @@ export class NotebookAPI {
     });
   }
 
-  private listenToKernel() {
-    // event fires when the current kernel is changed
-    this.panel.sessionContext.kernelChanged.connect(
-      (_, args: Session.ISessionConnection.IKernelChangedArgs) => {
-        this.kernel = args.newValue;
-      }
-    );
-  }
+
 
   private loadCells() {
     this.cells = [];
-    for (let i = 0; i < this.notebook.model.cells.length; i++)
+    for (let i = 0; i < this.notebook.model.cells.length; i++){
       this.cells.push(new CellAPI(this.notebook.model.cells.get(i), i));
+    }
   }
 }
