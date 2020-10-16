@@ -1,11 +1,11 @@
 import { NotebookPanel, Notebook } from '@jupyterlab/notebook';
 import { Kernel, Session } from '@jupyterlab/services';
-import { IObservableJSON } from '@jupyterlab/observables';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { Signal, ISignal } from '@lumino/signaling';
 
-import CellAPI from './cells';
+
+import CellAPI from './cell';
 
 export class NotebookAPI {
   private readonly _ready: PromiseDelegate<void>;
@@ -39,20 +39,21 @@ export class NotebookAPI {
     return this.panel.content;
   }
 
+  get language(): string{
+    let meta = this.notebook.model?.metadata
+    if(meta.has("language_info")){
+      let val = this.notebook.model.metadata.get("language_info").valueOf()
+      if(val instanceof Object)
+        return val['name']
+    }
+  }
+
   get path(): string {
     return this.panel.sessionContext.path;
   }
 
-  getName(): string {
-    return this.name;
-  }
-
   get name(): string {
     return PathExt.basename(this.path);
-  }
-
-  get metadata(): IObservableJSON {
-    return this.notebook.model.metadata;
   }
 
   get activeCell() {
@@ -61,10 +62,20 @@ export class NotebookAPI {
     );
   }
 
+  addCell(kind: 'code'| 'markdown', text: string, index: number){
+    let cell;
+    if(kind ==='code')
+      cell = this.notebook.model.contentFactory.createCodeCell({})
+    else
+      cell = this.notebook.model.contentFactory.createMarkdownCell({})
+    cell.value.text = text
+    this.notebook.model.cells.insert(index, cell)
+  }
+
   private loadCells() {
     this.cells = [];
     for (let i = 0; i < this.notebook.model.cells.length; i++)
-      this.cells.push(new CellAPI(this.notebook.model.cells.get(i)));
+      this.cells.push(new CellAPI(this.notebook.model.cells.get(i), i));
   }
 
   private listenToCells() {
