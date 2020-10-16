@@ -23,6 +23,6 @@ jlpm build
 jupyter lab build
 ```
 ### The running extension looks like this:
-![Image of codegen extension](https://github.com/mkery/JupyterLab-CodeGen/blob/main/screenshot.png)
+![Image of codegen extension](https://github.com/mkery/JupyterLab-CodeGen/blob/main/screenshot.png#1)
 
 #### Missing functionality that would be useful to demo? Let us know in issues or contribute! :D
