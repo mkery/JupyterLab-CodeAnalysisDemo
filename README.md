@@ -22,3 +22,7 @@ jlpm build
 # Rebuild JupyterLab after making any changes
 jupyter lab build
 ```
+### The running extension looks like this:
+![Image of codegen extension](https://github.com/mkery/JupyterLab-CodeGen/blob/main/screenshot.png)
+
+#### Missing functionality that would be useful to demo? Let us know in issues or contribute! :D
