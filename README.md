@@ -1,2 +1,24 @@
 # JupyterLab-CodeGen
-A demo for the _programatic_ reading and writing of user code in Jupyter notebooks 4 code analysis fun
+A demo JupyterLab Extension for the _programatic_ reading and writing of user code in Jupyter notebooks 4 code analysis fun
+
+### Install Instructions
+ 
+The `jlpm` command is JupyterLab's pinned version of
+[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
+`yarn` or `npm` in lieu of `jlpm` below.
+
+```bash
+# Clone the repo to your local environment
+# Move to codegen directory
+
+# Install dependencies
+jlpm
+# Build Typescript source
+jlpm build
+# Link your development version of the extension with JupyterLab
+jupyter labextension install .
+# Rebuild Typescript source after making changes
+jlpm build
+# Rebuild JupyterLab after making any changes
+jupyter lab build
+```
