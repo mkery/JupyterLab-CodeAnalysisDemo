@@ -1,5 +1,5 @@
-# JupyterLab Code Analysis Demo
-A demo JupyterLab Extension for the _programatic_ reading and writing of user code in Jupyter notebooks 4 code analysis fun
+# JupyterLab Code Analysis Extension Demo
+Lots of developer tools require access to _programatic_ reading and writing of user code, as well as variable state. This is an example JupyterLab Extension that provides simple code demonstrating __how to__ programatically reading and writing notebook user code, as well as accessing variable state and type information in the user's programming environment. Please feel free to copy for your own dev tool.
 
 ### Install Instructions
  
